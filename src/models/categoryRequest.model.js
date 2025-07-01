@@ -16,7 +16,7 @@ const categoryRequestSchema = new Schema(
     categoryName: {
       type: String,
       trim: true,
-      lowercase: true,
+      required: [true, "Category name is required."],
       unique: true,
       index: true,
     },
