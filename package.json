@@ -2,6 +2,7 @@
   "name": "node-bud-bazzar",
   "version": "1.0.0",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "start": "node index.js",
     "start:dev": "nodemon index.js"
@@ -29,6 +30,7 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.15.1",
     "morgan": "^1.10.0",
+    "multer": "^2.0.1",
     "nodemailer": "^7.0.3"
   }
 }

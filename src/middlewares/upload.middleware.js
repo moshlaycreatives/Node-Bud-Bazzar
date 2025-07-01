@@ -3,9 +3,9 @@ import multer from "multer";
 import fs from "fs";
 import path from "path";
 
-// =============================================
-// 1. Custom storage configuration
-// =============================================
+// ╔════════════════════════════════════════╗
+// ║      Custom storage configuration      ║
+// ╚════════════════════════════════════════╝
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     let uploadPath = "public/uploads";
@@ -37,9 +37,9 @@ const storage = multer.diskStorage({
   },
 });
 
-// =============================================
-// 2. File filter configuration
-// =============================================
+// ╔═════════════════════════════════════╗
+// ║      File filter configuration      ║
+// ╚═════════════════════════════════════╝
 const fileFilter = (req, file, cb) => {
   const ext = path.extname(file.originalname).toLowerCase();
 
@@ -59,6 +59,9 @@ const fileFilter = (req, file, cb) => {
   cb(null, true);
 };
 
+// ╔════════════════════════════════════╗
+// ║      Export "upload" function      ║
+// ╚════════════════════════════════════╝
 export const upload = multer({
   storage,
   fileFilter,

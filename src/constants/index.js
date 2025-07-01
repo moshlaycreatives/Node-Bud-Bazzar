@@ -1,0 +1,21 @@
+const STATUS_VALUES = {
+  PENDING: "PENDING",
+  APPROVED: "APPROVED",
+  REJECTED: "REJECTED",
+};
+
+export const STATUS = {
+  ACCOUNT: STATUS_VALUES,
+  CETEGORY_STATUS: STATUS_VALUES,
+};
+
+export const PRODUCT_TYPE = {
+  CANNABIS: "CANNABIS",
+  HEMP: "HEMP",
+};
+
+export const ACCOUNT_TYPE = {
+  ADMIN: "ADMIN",
+  SELLER: "SELLER",
+  BUYER: "BUYER",
+};

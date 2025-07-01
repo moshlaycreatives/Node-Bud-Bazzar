@@ -1,11 +1,16 @@
 import { UserModel } from "../models/user.model.js";
 import { asyncHandler, ApiResponce, sendEmail } from "../utils/index.js";
-import { NotFoundException, UnAuthorizedException } from "../errors/index.js";
+import {
+  NotFoundException,
+  UnAuthorizedException,
+  BadRequestException,
+  InternalServerErrorException,
+} from "../errors/index.js";
 import bcrypt from "bcryptjs";
 
-// ==============================================
-// 1. Signup
-// ==============================================
+// ╔═══════════════════╗
+// ║      Sign Up      ║
+// ╚═══════════════════╝
 export const signup = asyncHandler(async (req, res) => {
   const {
     accountType,
@@ -15,22 +20,23 @@ export const signup = asyncHandler(async (req, res) => {
     email,
     phone,
     address,
-    taxId,
+    productType,
     password,
   } = req.body;
+
+  if (accountType === "ADMIN") {
+    throw new UnAuthorizedException("Admin account creation is not allowed.");
+  }
+
+  if (productType === "CANNABIS" && !req.body.olccNumber) {
+    throw new BadRequestException(
+      "OLCC number is required for cannabis product type."
+    );
+  }
 
   const existingUser = await UserModel.findOne({ email });
   if (existingUser) {
     throw new BadRequestException("Email already exists.");
-  }
-
-  if (req.files.documents.lenght > 0) {
-    req.body.companyDocuments = req.files.documents.map(
-      (document) =>
-        `${process.env.BACKEND_BASE_URL}/${document.path.replace(/\\/g, "/")}`
-    );
-  } else {
-    throw new NotFoundException("Company documents are required.");
   }
 
   const user = await UserModel.create({
@@ -41,12 +47,11 @@ export const signup = asyncHandler(async (req, res) => {
     email,
     phone,
     address,
-    taxId,
-    companyDocuments: req.body.companyDocuments,
+    productType,
+    olccNumber: productType === "CANNABIS" ? req.body.olccNumber : "--",
     password,
+    accountStatus: "PENDING",
   });
-
-  const token = user.createJWT();
 
   const userDetails = await UserModel.findById(user._id).select(
     "-password -createdAt -updatedAt"
@@ -56,15 +61,14 @@ export const signup = asyncHandler(async (req, res) => {
     new ApiResponce({
       statusCode: 201,
       message: "Signup successful.",
-      token,
       data: userDetails,
     })
   );
 });
 
-// ==============================================
-// 2. Login
-// ==============================================
+// ╔═════════════════╗
+// ║      Login      ║
+// ╚═════════════════╝
 export const login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
@@ -74,11 +78,23 @@ export const login = asyncHandler(async (req, res) => {
     throw new NotFoundException("User not found.");
   }
 
-  if (!(await user.comparePassword(password))) {
+  const isPasswordValid = await user.comparePassword(password);
+
+  if (!isPasswordValid) {
     throw new UnAuthorizedException("Invalid credentials.");
   }
 
-  const token = await user.createJWT();
+  if (user.accountStatus === "REJECTED") {
+    throw new UnAuthorizedException(
+      "Your account has been rejected. Please contact support."
+    );
+  } else if (user.accountStatus === "PENDING") {
+    throw new UnAuthorizedException(
+      "Your account is in pending state. Please wait for admin approval."
+    );
+  }
+
+  const token = user.createJWT();
   const userDetails = await UserModel.findById(user._id).select(
     "-password -createdAt -updatedAt"
   );
@@ -86,21 +102,31 @@ export const login = asyncHandler(async (req, res) => {
   return res.status(200).json(
     new ApiResponce({
       statusCode: 200,
-      message: "login successfull.",
+      message: "Login successful.",
       token,
       data: userDetails,
     })
   );
 });
 
-// ==============================================
-// 3. Forgot Password
-// ==============================================
+// ╔═══════════════════════════╗
+// ║      Forgot Password      ║
+// ╚═══════════════════════════╝
 export const forgotPassword = asyncHandler(async (req, res) => {
   const { email } = req.body;
 
   const user = await UserModel.findOne({ email });
   if (!user) throw new NotFoundException("User not found with this email.");
+
+  if (user.accountStatus === "REJECTED") {
+    throw new UnAuthorizedException(
+      "Your account has been rejected. Please contact support."
+    );
+  } else if (user.accountStatus === "PENDING") {
+    throw new UnAuthorizedException(
+      "Your account is in pending state. Please wait for admin approval."
+    );
+  }
 
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
@@ -121,7 +147,7 @@ export const forgotPassword = asyncHandler(async (req, res) => {
     return res.status(200).json(
       new ApiResponce({
         statusCode: 200,
-        message: "Reset link sent to email.",
+        message: "OTP has been sent to your email.",
       })
     );
   } catch (error) {
@@ -132,9 +158,9 @@ export const forgotPassword = asyncHandler(async (req, res) => {
   }
 });
 
-// ==============================================
-// 4. Compare Forgot Password OTP
-// ==============================================
+// ╔═══════════════════════════════════════╗
+// ║      Compare Forgot Password OTP      ║
+// ╚═══════════════════════════════════════╝
 export const compareForgotPasswordOTP = asyncHandler(async (req, res) => {
   const { email, otp } = req.body;
 
@@ -149,6 +175,12 @@ export const compareForgotPasswordOTP = asyncHandler(async (req, res) => {
     throw new BadRequestException("Invalid or expired OTP.");
   }
 
+  user.resetPassword = true;
+  user.resetPasswordOTP = undefined;
+  user.resetPasswordExpire = undefined;
+
+  user.save();
+
   return res.status(200).json(
     new ApiResponce({
       statusCode: 200,
@@ -157,26 +189,22 @@ export const compareForgotPasswordOTP = asyncHandler(async (req, res) => {
   );
 });
 
-// ==============================================
-// 5. Reset Password
-// ==============================================
+// ╔══════════════════════════╗
+// ║      Reset Password      ║
+// ╚══════════════════════════╝
 export const resetPassword = asyncHandler(async (req, res) => {
-  const { email, otp, newPassword } = req.body;
+  const { email, password } = req.body;
 
   const user = await UserModel.findOne({ email });
-  if (!user || !user.resetPasswordOTP || !user.resetPasswordExpire) {
-    throw new BadRequestException("Invalid or expired OTP.");
+
+  if (!user || !user.resetPassword) {
+    throw new BadRequestException(
+      "User not found or reset password not initiated."
+    );
   }
 
-  const isValid = await bcrypt.compare(otp, user.resetPasswordOTP);
-
-  if (!isValid || user.resetPasswordExpire < Date.now()) {
-    throw new BadRequestException("Invalid or expired OTP.");
-  }
-
-  user.password = newPassword;
-  user.resetPasswordOTP = undefined;
-  user.resetPasswordExpire = undefined;
+  user.password = password;
+  user.resetPassword = false;
 
   await user.save();
 
@@ -188,13 +216,11 @@ export const resetPassword = asyncHandler(async (req, res) => {
   );
 });
 
-// ==============================================
-// 6. Get User by ID
-// ==============================================
-export const getUser = asyncHandler(async (req, res) => {
-  const { id } = req.params;
-
-  const user = await UserModel.findById(id).select(
+// ╔══════════════════════════╗
+// ║      Get User By Id      ║
+// ╚══════════════════════════╝
+export const getProfileDetails = asyncHandler(async (req, res) => {
+  const user = await UserModel.findById(req.userId).select(
     "-password -resetPasswordOTP -resetPasswordExpire -createdAt -updatedAt"
   );
 

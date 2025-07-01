@@ -1,8 +1,8 @@
 import { NotFoundException } from "../errors/index.js";
 
-// ================================================
-// * Middleware : Check Required Fields
-// ================================================
+// ╔══════════════════════════════════════════════╗
+// ║      Middleware : Check Required Fields      ║
+// ╚══════════════════════════════════════════════╝
 export const requiredFields = (requiredFields) => (req, res, next) => {
   const missingFields = [];
 
@@ -50,14 +50,14 @@ export const requiredFields = (requiredFields) => (req, res, next) => {
   }
 };
 
-// ================================================
-// * Sample How To Pass Data
-// ================================================
+// ╔═══════════════════════════════════╗
+// ║      Sample How To Pass Data      ║
+// ╚═══════════════════════════════════╝
 /*
 checkRequiredFields([
   "companyName",
   "clientName",
   "date",
-  "order.products",
+  "order.products", // Check required filed "products" in order object
 ])
 */

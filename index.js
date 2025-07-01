@@ -1,4 +1,5 @@
 import dotenv from "dotenv";
+dotenv.config();
 import https from "https";
 import http from "http";
 import fs from "fs";
@@ -8,14 +9,9 @@ import { connectDb } from "./src/config/db.config.js";
 import { createAdmin } from "./src/utils/createAdmin.util.js";
 import { NotFoundException } from "./src/errors/index.js";
 
-// ============================================
-// 1. Dotenv configuration
-// ============================================
-dotenv.config();
-
-// ============================================
-// 2. Server Setup
-// ============================================
+// ╔════════════════════════╗
+// ║      Server Setup      ║
+// ╚════════════════════════╝
 let server;
 if (
   process.env.NODE_ENV === "PRODUCTION" &&
@@ -47,9 +43,9 @@ if (
   server = http.createServer(app);
 }
 
-// ============================================
-// 3. Server Listening & DB Connection
-// ============================================
+// ╔════════════════════════════════════════════╗
+// ║      Server Listening & DB Connection      ║
+// ╚════════════════════════════════════════════╝
 const PORT = process.env.PORT || 8585;
 (async () => {
   try {

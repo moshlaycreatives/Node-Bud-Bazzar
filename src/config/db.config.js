@@ -5,6 +5,9 @@ dotenv.config();
 
 const DB_URL = process.env.DB_URL;
 
+// ╔════════════════════════════╗
+// ║      Connect Database      ║
+// ╚════════════════════════════╝
 export const connectDb = async () => {
   try {
     if (!DB_URL) {

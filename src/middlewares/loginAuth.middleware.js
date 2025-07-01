@@ -1,17 +1,13 @@
 import dotenv from "dotenv";
-import { User } from "../models/user.model.js";
+import { UserModel } from "../models/user.model.js";
 import jwt from "jsonwebtoken";
-import {
-  ForbiddenException,
-  NotFoundException,
-  UnAuthorizedException,
-} from "../errors/index.js";
+import { ForbiddenException, NotFoundException } from "../errors/index.js";
 
 dotenv.config();
 
-// ================================================
-// * Middleware : Login Auth
-// ================================================
+// ╔═══════════════════════════════════╗
+// ║      Middleware : Login Auth      ║
+// ╚═══════════════════════════════════╝
 export const loginAuth = async (req, res, next) => {
   const token = req?.headers?.authorization;
 
@@ -21,21 +17,30 @@ export const loginAuth = async (req, res, next) => {
   }
 
   let payload;
-  try {
-    payload = jwt.verify(token.split(" ")[1], process.env.JWT_SECRET);
-  } catch (error) {
-    console.error("Invalid token provided.", error);
-    throw new UnAuthorizedException(error.message);
-  }
+  payload = jwt.verify(token.split(" ")[1], process.env.JWT_SECRET_KEY);
 
-  const user = await User.findOne({ _id: payload.id });
+  const user = await UserModel.findOne({ _id: payload.id });
 
   if (!user) {
     console.error("User not found by provided token");
     throw new ForbiddenException("User not found by provided token");
   }
 
-  req.userId = user.id;
+  if (user.accountStatus === "REJECTED") {
+    console.error("Your account has been rejected. Please contact support.");
+    throw new ForbiddenException(
+      "Your account has been rejected. Please contact support."
+    );
+  } else if (user.accountStatus === "PENDING") {
+    console.error(
+      "Your account is in pending state. Please wait for admin approval."
+    );
+    throw new ForbiddenException(
+      "Your account is in pending state. Please wait for admin approval."
+    );
+  }
+
+  req.userId = user._id;
   req.userRole = user.accountType;
   req.loggedInUser = user;
 

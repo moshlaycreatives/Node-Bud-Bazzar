@@ -5,39 +5,75 @@ import {
   BadRequestException,
   InternalServerErrorException,
 } from "../errors/index.js";
+import { ACCOUNT_TYPE, PRODUCT_TYPE, STATUS } from "../constants/index.js";
 
+// ╔═══════════════════════════════╗
+// ║      User Counter Schema      ║
+// ╚═══════════════════════════════╝
+const userCounter = new Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+
+    count: {
+      type: Number,
+      default: 19999,
+    },
+  },
+  { timestamps: true, versionKey: false }
+);
+
+export const UserCounterModel = model("UserCounter", userCounter);
+
+// ╔═══════════════════════╗
+// ║      User Schema      ║
+// ╚═══════════════════════╝
 const userSchema = new Schema(
   {
+    id: {
+      type: String,
+      required: true,
+      unique: true,
+      immutable: true,
+      index: true,
+    },
+
     accountType: {
       type: String,
-      enum: ["ADMIN", "SELLER", "BUYER"],
-      required: [true, "Account type is required."],
+      enum: Object.values(ACCOUNT_TYPE),
+      required: true,
+      immutable: true,
       index: true,
     },
 
     accountStatus: {
       type: String,
-      enum: ["PENDING", "APPROVED", "REJECTED"],
-      default: "PENDING",
+      enum: Object.values(STATUS.ACCOUNT),
+      default: STATUS.ACCOUNT.PENDING,
+      index: true,
     },
 
     firstName: {
       type: String,
-      required: [true, "First name is required."],
       trim: true,
+      required: [true, "Frist name is required."],
       index: true,
     },
 
     lastName: {
       type: String,
-      required: [true, "Last name is required."],
       trim: true,
+      required: [true, "Last name is required."],
+      index: true,
     },
 
     companyName: {
       type: String,
-      required: [true, "Company Name is required."],
       trim: true,
+      required: [true, "Company name is required."],
       index: true,
     },
 
@@ -52,33 +88,38 @@ const userSchema = new Schema(
 
     phone: {
       type: String,
-      required: [true, "Phone number is required."],
       trim: true,
+      required: [true, "Phone number is required."],
     },
 
     address: {
       type: String,
+      trim: true,
       required: [true, "Address is required."],
-      trim: true,
     },
 
-    taxId: {
+    productType: {
       type: String,
-      required: [true, "Tax id is required."],
-      trim: true,
+      enum: Object.values(PRODUCT_TYPE),
+      required: [true, "Product type is required."],
+      immutable: true,
+      index: true,
     },
 
-    companyDocuments: [
-      {
-        type: String,
-        required: [true, "Company Documents are required."],
-        trim: true,
-      },
-    ],
+    olccNumber: {
+      type: String,
+      trim: true,
+    },
 
     password: {
       type: String,
       required: [true, "Password is required."],
+      minlength: [6, "Password must be at least 6 characters long."],
+    },
+
+    resetPassword: {
+      type: Boolean,
+      default: false,
     },
 
     resetPasswordOTP: {
@@ -92,28 +133,59 @@ const userSchema = new Schema(
   { timestamps: true, versionKey: false }
 );
 
-// ==============================================
-// 1. Hash password before storing in db
-// ==============================================
+// ╔════════════════════════════════════╗
+// ║      Pre-Hook (Hash Password)      ║
+// ╚════════════════════════════════════╝
 userSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next();
   try {
-    if (!this.isModified("password")) return next();
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
     next();
   } catch (error) {
-    throw new InternalServerErrorException(
-      "An error occurred while hashing your password."
+    return next(
+      new InternalServerErrorException(
+        "An error occurred while hashing your password."
+      )
     );
   }
 });
 
-// ==============================================
-// 2. Compare Password
-// ==============================================
+// ╔══════════════════════════╗
+// ║      Pre-Validation      ║
+// ╚══════════════════════════╝
+userSchema.pre("validate", async function (next) {
+  if (this.isNew) {
+    try {
+      let count = await UserCounterModel.findOne({ name: "id" });
+      if (!count) {
+        count = await UserCounterModel.create({ name: "id" });
+      }
+
+      const updatedCount = await UserCounterModel.findOneAndUpdate(
+        { name: "id" },
+        { $inc: { count: 1 } },
+        { new: true }
+      );
+
+      const prefix =
+        this.firstName.slice(0, 1).toUpperCase() +
+        this.lastName.slice(0, 1).toUpperCase();
+      this.id = `${prefix}${updatedCount.count.toString()}`;
+      next();
+    } catch (error) {
+      return next(error);
+    }
+  }
+  next();
+});
+
+// ╔════════════════════════════╗
+// ║      Compare Password      ║
+// ╚════════════════════════════╝
 userSchema.methods.comparePassword = async function (candidatePassword) {
   try {
-    return await bcrypt.compare(candidatePassword, this.password);
+    return await bcrypt.compare(candidatePassword.toString(), this.password);
   } catch (error) {
     console.error("There is an error while comparing password.", error);
     throw new BadRequestException(
@@ -122,16 +194,12 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
   }
 };
 
-// ==============================================
-// 3. Generate JWT Token
-// ==============================================
+// ╔══════════════════════════════╗
+// ║      Generate JWT Token      ║
+// ╚══════════════════════════════╝
 userSchema.methods.createJWT = function () {
-  return jwt.sign(
-    { id: this._id },
-    process.env.JWT_SECRET || "t/19HAsveT4xJbTQmf0KHA==",
-    {
-      expiresIn: process.env.JWT_EXPIRE || "1d",
-    }
-  );
+  return jwt.sign({ id: this._id }, process.env.JWT_SECRET_KEY, {
+    expiresIn: process.env.JWT_EXPIRE_IN,
+  });
 };
 export const UserModel = model("User", userSchema);

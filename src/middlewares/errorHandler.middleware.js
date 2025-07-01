@@ -1,5 +1,8 @@
 import { ApiResponce } from "../utils/apiResponce.util.js";
 
+// ╔══════════════════════════════════════╗
+// ║      Middleware : Error handler      ║
+// ╚══════════════════════════════════════╝
 export const errorHandler = (error, req, res, next) => {
   let customError = {
     statusCode: error.statusCode || 500,
