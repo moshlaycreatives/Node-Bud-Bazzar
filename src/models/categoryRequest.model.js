@@ -28,8 +28,8 @@ const categoryRequestSchema = new Schema(
 
     status: {
       type: String,
-      enum: Object.values(STATUS.CETEGORY_STATUS),
-      default: STATUS.CETEGORY_STATUS.PENDING,
+      enum: Object.values(STATUS.CATEGORY_REQUEST),
+      default: STATUS.CATEGORY_REQUEST.PENDING,
     },
 
     reason: {

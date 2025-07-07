@@ -4,5 +4,6 @@ export { trimBodyObject } from "./trimBodyObject.middleware.js";
 export { requiredFields } from "./requiredFields.middleware.js";
 export { emailValidator } from "./emailValidation.middleware.js";
 export { loginAuth } from "./loginAuth.middleware.js";
+export { sellerAuth } from "./sellerAuth.middleware.js";
 export { adminAuth } from "./adminAuth.middleware.js";
 export { upload } from "./upload.middleware.js";

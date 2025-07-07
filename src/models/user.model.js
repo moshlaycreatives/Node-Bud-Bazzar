@@ -151,9 +151,9 @@ userSchema.pre("save", async function (next) {
   }
 });
 
-// ╔══════════════════════════╗
-// ║      Pre-Validation      ║
-// ╚══════════════════════════╝
+// ╔═══════════════════════════════════════════════════╗
+// ║      Pre-Validate Hook (Add id value in data)     ║
+// ╚═══════════════════════════════════════════════════╝
 userSchema.pre("validate", async function (next) {
   if (this.isNew) {
     try {

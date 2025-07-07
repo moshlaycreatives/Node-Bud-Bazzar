@@ -3,6 +3,7 @@ import { authRouter } from "./auth.route.js";
 import { adminRouter } from "./admin.route.js";
 import { categoryRouter } from "./category.route.js";
 import { loginAuth, adminAuth } from "../middlewares/index.js";
+import { productRouter } from "./product.route.js";
 
 const router = Router();
 
@@ -20,5 +21,7 @@ router.use("/admin", loginAuth, adminAuth, adminRouter);
 // ║      Category Routes      ║
 // ╚═══════════════════════════╝
 router.use("/category", categoryRouter);
+
+router.use("/product", productRouter);
 
 export { router };

@@ -6,7 +6,8 @@ const STATUS_VALUES = {
 
 export const STATUS = {
   ACCOUNT: STATUS_VALUES,
-  CETEGORY_STATUS: STATUS_VALUES,
+  CATEGORY_REQUEST: STATUS_VALUES,
+  PRODUCT: STATUS_VALUES,
 };
 
 export const PRODUCT_TYPE = {
@@ -18,4 +19,9 @@ export const ACCOUNT_TYPE = {
   ADMIN: "ADMIN",
   SELLER: "SELLER",
   BUYER: "BUYER",
+};
+
+export const CANNABINOID_TYPE = {
+  THCA: "THCA",
+  THCP: "THCP",
 };

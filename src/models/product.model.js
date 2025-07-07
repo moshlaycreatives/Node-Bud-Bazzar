@@ -1,27 +1,95 @@
 import { model, Schema } from "mongoose";
+import { CANNABINOID_TYPE, PRODUCT_TYPE, STATUS } from "../constants/index.js";
 
+// ╔══════════════════════════════════╗
+// ║      Product Counter Schema      ║
+// ╚══════════════════════════════════╝
+const productCounter = new Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+
+    count: {
+      type: Number,
+      default: 2000,
+    },
+  },
+  { timestamps: true, versionKey: false }
+);
+
+export const ProductCounterModel = model("ProductCounter", productCounter);
+
+// ╔══════════════════════════╗
+// ║      Product Schema      ║
+// ╚══════════════════════════╝
 const productSchema = new Schema(
   {
     id: {
       type: String,
-      required: true,
+      required: [true, "Product id is required."],
       unique: true,
       immutable: true,
       index: true,
     },
 
-    productName: String,
+    productStatus: {
+      type: String,
+      enum: Object.values(STATUS.PRODUCT),
+      default: STATUS.PRODUCT.PENDING,
+    },
 
-    description: String,
+    productName: {
+      type: String,
+      trim: true,
+      required: [true, "Product name is required."],
+      index: true,
+    },
 
-    sellerPrice: String,
+    description: {
+      type: String,
+      trim: true,
+      required: [true, "Product description is required."],
+    },
 
-    category: String,
+    sellerPrice: {
+      type: Number,
+      required: [true, "Seller price is required."],
+    },
 
-    type: String,
-    productType: String,
-    strainType: String,
-    growType: String,
+    productCategory: {
+      type: String,
+      trim: true,
+      required: [true, "Product category is required."],
+    },
+
+    productType: {
+      type: String,
+      trim: true,
+      enum: Object.values(PRODUCT_TYPE),
+      required: [true, "Product type is required."],
+    },
+
+    cannabinoidType: {
+      type: String,
+      trim: true,
+      enum: Object.values(CANNABINOID_TYPE),
+      required: [true, "Cannabinoid type is required."],
+    },
+
+    strainType: {
+      type: String,
+      trim: true,
+      required: [true, "Product strain type is required."],
+    },
+
+    growType: {
+      type: String,
+      trim: true,
+      required: [true, "Product grow type is required."],
+    },
 
     sellerId: {
       type: Schema.Types.ObjectId,
@@ -29,11 +97,29 @@ const productSchema = new Schema(
       required: true,
     },
 
-    rating: Number,
+    labReport: {
+      type: String,
+      trim: true,
+      required: [true, "Product lab report is required."],
+    },
 
-    labReport: [],
+    productImage: {
+      type: String,
+      trim: true,
+      required: [true, "Product image is required."],
+    },
 
-    galleryContent: [],
+    galleryContent: [
+      {
+        type: String,
+        trim: true,
+      },
+    ],
+
+    profitMargin: {
+      type: Number,
+      default: 0,
+    },
 
     date: {
       type: Date,
@@ -43,4 +129,30 @@ const productSchema = new Schema(
   { timestamps: true, versionKey: false }
 );
 
-export const Product = model("Product", productSchema);
+// ╔═══════════════════════════════════════════════════╗
+// ║      Pre-Validate Hook (Add id value in data)     ║
+// ╚═══════════════════════════════════════════════════╝
+productSchema.pre("validate", async function (next) {
+  if (this.isNew) {
+    try {
+      let count = await ProductCounterModel.findOne({ name: "id" });
+      if (!count) {
+        count = await ProductCounterModel.create({ name: "id" });
+      }
+
+      const updatedCounter = await ProductCounterModel.findOneAndUpdate(
+        { name: "id" },
+        { $inc: { count: 1 } },
+        { new: true }
+      );
+
+      this.id = updatedCounter.count;
+      next();
+    } catch (error) {
+      console.error("An error occurred while creating product id.");
+      return next(error);
+    }
+  }
+});
+
+export const ProductModel = model("Product", productSchema);
