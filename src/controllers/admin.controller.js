@@ -1,20 +1,49 @@
 import { UserModel } from "../models/user.model.js";
 import { asyncHandler, ApiResponce } from "../utils/index.js";
 import { NotFoundException, BadRequestException } from "../errors/index.js";
+import { ACCOUNT_TYPE, STATUS } from "../constants/index.js";
 
-// ╔═════════════════════════╗
-// ║      Get All Users      ║
-// ╚═════════════════════════╝
-export const getAllUsers = asyncHandler(async (req, res) => {
-  const users = await UserModel.find({ accountType: { $ne: "ADMIN" } }).select(
+// ╔════════════════════════════════╗
+// ║      Get Account Requests      ║
+// ╚════════════════════════════════╝
+export const getAccountRequests = asyncHandler(async (req, res) => {
+  const users = await UserModel.find({
+    accountType: { $ne: ACCOUNT_TYPE.ADMIN },
+    accountStatus: STATUS.ACCOUNT.PENDING,
+  }).select(
     "-password -resetPasswordOTP -resetPasswordExpire -createdAt -updatedAt"
   );
 
   return res.status(200).json(
     new ApiResponce({
       statusCode: 200,
-      message: "All users fetched successfully.",
-      data: users,
+      message:
+        users.length > 0
+          ? "Account requests fetched successfully."
+          : "Account requests collection is empty.",
+      data: users.length > 0 ? users : [],
+    })
+  );
+});
+// ╔══════════════════════════════════╗
+// ║      Get All Approved Users      ║
+// ╚══════════════════════════════════╝
+export const getAllApprovedUsers = asyncHandler(async (req, res) => {
+  const users = await UserModel.find({
+    accountType: { $ne: ACCOUNT_TYPE.ADMIN },
+    accountStatus: STATUS.ACCOUNT.APPROVED,
+  }).select(
+    "-password -resetPasswordOTP -resetPasswordExpire -createdAt -updatedAt"
+  );
+
+  return res.status(200).json(
+    new ApiResponce({
+      statusCode: 200,
+      message:
+        users.length > 0
+          ? "All approved users fetched successfully."
+          : "Approved users collection is empty.",
+      data: users.length > 0 ? users : [],
     })
   );
 });
@@ -65,23 +94,6 @@ export const updateAccountStatus = asyncHandler(async (req, res) => {
     new ApiResponce({
       statusCode: 200,
       message: `User account ${status.toLowerCase()} successfully.`,
-    })
-  );
-});
-
-// ╔═════════════════════════╗
-// ║      Get All Users      ║
-// ╚═════════════════════════╝
-export const getAllUserss = asyncHandler(async (req, res) => {
-  const users = await UserModel.find({ accountType: { $ne: "ADMIN" } }).select(
-    "-password -resetPasswordOTP -resetPasswordExpire -createdAt -updatedAt"
-  );
-
-  return res.status(200).json(
-    new ApiResponce({
-      statusCode: 200,
-      message: "All users fetched successfully.",
-      data: users,
     })
   );
 });

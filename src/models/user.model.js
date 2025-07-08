@@ -23,7 +23,7 @@ const userCounter = new Schema(
       default: 19999,
     },
   },
-  { timestamps: true, versionKey: false }
+  { timestamps: true, versionKey: false, collection: "user_counter" }
 );
 
 export const UserCounterModel = model("UserCounter", userCounter);

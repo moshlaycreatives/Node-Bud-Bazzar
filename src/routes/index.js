@@ -22,6 +22,9 @@ router.use("/admin", loginAuth, adminAuth, adminRouter);
 // ╚═══════════════════════════╝
 router.use("/category", categoryRouter);
 
+// ╔═══════════════════╗
+// ║      Product      ║
+// ╚═══════════════════╝
 router.use("/product", productRouter);
 
 export { router };

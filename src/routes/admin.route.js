@@ -2,28 +2,34 @@ import { Router } from "express";
 import { trimBodyObject, requiredFields } from "../middlewares/index.js";
 
 import {
-  getAllUsers,
+  getAccountRequests,
+  getAllApprovedUsers,
   getUser,
   updateAccountStatus,
 } from "../controllers/admin.controller.js";
 
 const adminRouter = Router();
 
-// ╔═════════════════════════╗
-// ║      Get All Users      ║
-// ╚═════════════════════════╝
-adminRouter.route("/").get(getAllUsers);
+// ╔════════════════════════════════╗
+// ║      Get Account Requests      ║
+// ╚════════════════════════════════╝
+adminRouter.route("/account-requests").get(getAccountRequests);
+
+// ╔══════════════════════════════════╗
+// ║      Get All Approved Users      ║
+// ╚══════════════════════════════════╝
+adminRouter.route("/").get(getAllApprovedUsers);
 
 // ╔══════════════════════════╗
 // ║      Get User by ID      ║
 // ╚══════════════════════════╝
-adminRouter.route("/:id").get(getUser);
+adminRouter.route("/user/:id").get(getUser);
 
 // ╔═══════════════════════════════════════════════════════╗
 // ║      Update Account Status (APPROVED / REJECTED)      ║
 // ╚═══════════════════════════════════════════════════════╝
 adminRouter
-  .route("/:id")
+  .route("/user/:id")
   .patch(trimBodyObject, requiredFields(["status"]), updateAccountStatus);
 
 export { adminRouter };

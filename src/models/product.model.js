@@ -17,7 +17,7 @@ const productCounter = new Schema(
       default: 2000,
     },
   },
-  { timestamps: true, versionKey: false }
+  { timestamps: true, versionKey: false, collection: "product_counter" }
 );
 
 export const ProductCounterModel = model("ProductCounter", productCounter);

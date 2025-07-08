@@ -40,11 +40,9 @@ export const loginAuth = async (req, res, next) => {
     );
   }
 
-  console.log("Llllllllllllllllllllllllllogged In User: ", user);
   req.userId = user._id;
   req.userRole = user.accountType;
   req.loggedInUser = user;
-  console.log("Logged In User: ", req.loggedInUser);
 
   next();
 };
