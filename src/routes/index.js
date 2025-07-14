@@ -4,6 +4,7 @@ import { adminRouter } from "./admin.route.js";
 import { categoryRouter } from "./category.route.js";
 import { loginAuth, adminAuth } from "../middlewares/index.js";
 import { productRouter } from "./product.route.js";
+import { reviewRouter } from "./review.route.js";
 
 const router = Router();
 
@@ -26,5 +27,10 @@ router.use("/category", categoryRouter);
 // ║      Product      ║
 // ╚═══════════════════╝
 router.use("/product", productRouter);
+
+// ╔══════════════════╗
+// ║      Review      ║
+// ╚══════════════════╝
+router.use("/review", reviewRouter);
 
 export { router };

@@ -35,6 +35,7 @@ authRouter
       "productType",
       "password",
     ]),
+    emailValidator,
     signup
   );
 
