@@ -21,11 +21,13 @@ import {
 // ╚═══════════════════════╝
 import {
   addProduct,
+  addProductTags,
   addProfitMargin,
   deleteProduct,
   getAllProducts,
   getAllProductsWithoutSignIn,
   getSellerProducts,
+  updateProductBySeller,
   updateProfitMargin,
 } from "../controllers/product.controller.js";
 
@@ -64,6 +66,25 @@ productRouter
 // ╚════════════════════════════════════════════════════════════════════════════╝
 productRouter.route("/get-all-products").get(loginAuth, getAllProducts);
 
+productRouter
+  .route("/update-product/:productId")
+  .patch(
+    loginAuth,
+    sellerAuth,
+    upload.fields([{ name: "image", maxCount: 1 }, { name: "documents" }]),
+    trimBodyObject,
+    requiredFields([
+      "productName",
+      "description",
+      "sellerPrice",
+      "productCategory",
+      "cannabinoidType",
+      "strainType",
+      "growType",
+    ]),
+    updateProductBySeller
+  );
+
 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>
 // >>      ADMIN Routes      >>
 // <<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -99,5 +120,18 @@ productRouter
 productRouter
   .route("/delete-product/:productId")
   .delete(loginAuth, deleteProduct);
+
+// ╔════════════════════════════╗
+// ║      Add Product Tags      ║
+// ╚════════════════════════════╝
+productRouter
+  .route("/add-product-tag/:productId")
+  .patch(
+    loginAuth,
+    adminAuth,
+    trimBodyObject,
+    requiredFields(["productTag"]),
+    addProductTags
+  );
 
 export { productRouter };

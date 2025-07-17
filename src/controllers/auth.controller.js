@@ -215,24 +215,3 @@ export const resetPassword = asyncHandler(async (req, res) => {
     })
   );
 });
-
-// ╔══════════════════════════╗
-// ║      Get User By Id      ║
-// ╚══════════════════════════╝
-export const getProfileDetails = asyncHandler(async (req, res) => {
-  const user = await UserModel.findById(req.userId).select(
-    "-password -resetPasswordOTP -resetPasswordExpire -createdAt -updatedAt"
-  );
-
-  if (!user) {
-    throw new NotFoundException("User not found.");
-  }
-
-  return res.status(200).json(
-    new ApiResponce({
-      statusCode: 200,
-      message: "User fetched successfully.",
-      data: user,
-    })
-  );
-});

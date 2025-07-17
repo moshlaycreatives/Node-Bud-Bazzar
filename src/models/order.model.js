@@ -1,5 +1,4 @@
 import { model, Schema } from "mongoose";
-// TODO: Remove this line of code if not used in model code
 import { CANNABINOID_TYPE, PRODUCT_TYPE, STATUS } from "../constants/index.js";
 
 // ╔════════════════════════════════╗

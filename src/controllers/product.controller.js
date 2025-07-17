@@ -5,7 +5,7 @@ import {
   UnAuthorizedException,
 } from "../errors/index.js";
 import { ApiResponce, asyncHandler } from "../utils/index.js";
-import { ACCOUNT_TYPE, STATUS } from "../constants/index.js";
+import { ACCOUNT_TYPE, PRODUCT_TAGS, STATUS } from "../constants/index.js";
 
 // ╔═══════════════════════════╗
 // ║      Add New Product      ║
@@ -37,7 +37,7 @@ export const addProduct = asyncHandler(async (req, res) => {
     process.env.BACKEND_BASE_URL +
     req.files["documents"][0].path.replace(/\\/g, "/");
 
-  await ProductModel.create({
+  const newProduct = await ProductModel.create({
     productName,
     description,
     sellerPrice,
@@ -56,6 +56,7 @@ export const addProduct = asyncHandler(async (req, res) => {
       statusCode: 201,
       message:
         "Product added but in pending state, Wait untill admin approved it.",
+      data: newProduct,
     })
   );
 });
@@ -66,26 +67,6 @@ export const addProduct = asyncHandler(async (req, res) => {
 export const getAllProductsWithoutSignIn = asyncHandler(async (req, res) => {
   const allProducts = await ProductModel.find({
     productStatus: STATUS.PRODUCT.APPROVED,
-  });
-
-  return res.status(200).json(
-    new ApiResponce({
-      statusCode: 200,
-      message:
-        allProducts.length > 0
-          ? "Products fetched successfully."
-          : "Products collection is empty.",
-      data: allProducts.length > 0 ? allProducts : [],
-    })
-  );
-});
-
-// ╔═══════════════════════════════╗
-// ║      Get Seller Products      ║
-// ╚═══════════════════════════════╝
-export const getSellerProducts = asyncHandler(async (req, res) => {
-  const allProducts = await ProductModel.find({
-    sellerId: req.userId,
   });
 
   return res.status(200).json(
@@ -127,6 +108,88 @@ export const getAllProducts = asyncHandler(async (req, res) => {
   );
 });
 
+// ╔═══════════════════════════════╗
+// ║      Get Seller Products      ║
+// ╚═══════════════════════════════╝
+export const getSellerProducts = asyncHandler(async (req, res) => {
+  const allProducts = await ProductModel.find({
+    sellerId: req.userId,
+  });
+
+  return res.status(200).json(
+    new ApiResponce({
+      statusCode: 200,
+      message:
+        allProducts.length > 0
+          ? "Products fetched successfully."
+          : "Products collection is empty.",
+      data: allProducts.length > 0 ? allProducts : [],
+    })
+  );
+});
+
+// ╔════════════════════════════════════╗
+// ║      Update Product by Seller      ║
+// ╚════════════════════════════════════╝
+export const updateProductBySeller = asyncHandler(async (req, res) => {
+  const { productId } = req.params;
+  const {
+    productName,
+    description,
+    productCategory,
+    cannabinoidType,
+    strainType,
+    growType,
+  } = req.body;
+
+  const product = await ProductModel.findOne({ _id: productId });
+
+  if (!product) {
+    throw new NotFoundException("Product not found.");
+  }
+
+  if (product.sellerId.toString() !== req.userId.toString()) {
+    throw new UnAuthorizedException("Unauthorized seller.");
+  }
+
+  if (req.body.sellerPrice && req.body.sellerPrice !== product.sellerPrice) {
+    product.productStatus = STATUS.PRODUCT.PENDING;
+    product.sellerPrice = req.body.sellerPrice;
+    await product.save();
+  } else {
+    product.sellerPrice = product.sellerPrice;
+  }
+
+  if (req.files["image"]) {
+    product.productImage =
+      process.env.BACKEND_BASE_URL +
+      req.files["image"][0].path.replace(/\\/g, "/");
+  }
+
+  if (req.files["documents"]) {
+    product.labReport =
+      process.env.BACKEND_BASE_URL +
+      req.files["documents"][0].path.replace(/\\/g, "/");
+  }
+
+  product.productName = productName || product.productName;
+  product.description = description || product.description;
+  product.productCategory = productCategory || product.productCategory;
+  product.cannabinoidType = cannabinoidType || product.cannabinoidType;
+  product.strainType = strainType || product.strainType;
+  product.growType = growType || product.growType;
+
+  await product.save();
+
+  return res.status(200).json(
+    new ApiResponce({
+      statusCode: 200,
+      message: "Product updated successfully.",
+      data: product,
+    })
+  );
+});
+
 // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 // >>      ADMIN CONTROLLERS      >>
 // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -141,10 +204,6 @@ export const addProfitMargin = asyncHandler(async (req, res) => {
 
   if (!product) {
     throw new NotFoundException("Product not found.");
-  }
-
-  if (product.profitMargin > 0) {
-    throw new ConflictException("Profit margin already added.");
   }
 
   product.profitMargin = profitMargin;
@@ -225,6 +284,42 @@ export const deleteProduct = asyncHandler(async (req, res) => {
     new ApiResponce({
       statusCode: 200,
       message: "Product deleted successfully.",
+    })
+  );
+});
+
+// ╔════════════════════════════╗
+// ║      Add Product Tags      ║
+// ╚════════════════════════════╝
+export const addProductTags = asyncHandler(async (req, res) => {
+  const { productId } = req.params;
+  const { productTag } = req.body;
+
+  if (typeof productTag !== "string") {
+    throw new NotFoundException("Product tag must be a string.");
+  }
+
+  if (!Object.values(PRODUCT_TAGS).slice(1).includes(productTag)) {
+    throw new NotFoundException("Invalid product tag.");
+  }
+
+  const product = await ProductModel.findOne({ _id: productId });
+
+  if (!product) {
+    throw new NotFoundException("Product not found.");
+  }
+
+  if (product.productTags.includes(productTag)) {
+    throw new ConflictException("Product tag already exists.");
+  }
+
+  product.productTags.push(productTag);
+  await product.save();
+
+  return res.status(200).json(
+    new ApiResponce({
+      statusCode: 200,
+      message: "Product tag added successfully.",
     })
   );
 });

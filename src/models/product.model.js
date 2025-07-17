@@ -1,5 +1,10 @@
 import { model, Schema } from "mongoose";
-import { CANNABINOID_TYPE, PRODUCT_TYPE, STATUS } from "../constants/index.js";
+import {
+  CANNABINOID_TYPE,
+  PRODUCT_TAGS,
+  PRODUCT_TYPE,
+  STATUS,
+} from "../constants/index.js";
 
 // ╔══════════════════════════════════╗
 // ║      Product Counter Schema      ║
@@ -37,7 +42,7 @@ const productSchema = new Schema(
 
     productStatus: {
       type: String,
-      enum: Object.values(STATUS.PRODUCT),
+      enum: Object.values(STATUS.PRODUCT).slice(0, 2), // PENDING, APPROVED
       default: STATUS.PRODUCT.PENDING,
     },
 
@@ -68,14 +73,14 @@ const productSchema = new Schema(
     productType: {
       type: String,
       trim: true,
-      enum: Object.values(PRODUCT_TYPE),
+      enum: Object.values(PRODUCT_TYPE), // CANNABIS, HEMP
       required: [true, "Product type is required."],
     },
 
     cannabinoidType: {
       type: String,
       trim: true,
-      enum: Object.values(CANNABINOID_TYPE),
+      enum: Object.values(CANNABINOID_TYPE), // THCA, THCP
       required: [true, "Cannabinoid type is required."],
     },
 
@@ -119,6 +124,12 @@ const productSchema = new Schema(
     profitMargin: {
       type: Number,
       default: 0,
+    },
+
+    productTags: {
+      type: [String],
+      enum: Object.values(PRODUCT_TAGS), // NEW, RECOMMENDED, FEATURED
+      default: [PRODUCT_TAGS.NEW],
     },
 
     date: {

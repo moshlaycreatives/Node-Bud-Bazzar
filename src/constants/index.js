@@ -26,3 +26,9 @@ export const CANNABINOID_TYPE = {
   THCA: "THCA",
   THCP: "THCP",
 };
+
+export const PRODUCT_TAGS = {
+  NEW: "NEW",
+  RECOMENDED: "RECOMMENDED",
+  FEATURED: "FEATURED",
+};

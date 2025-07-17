@@ -43,7 +43,7 @@ const userSchema = new Schema(
 
     accountType: {
       type: String,
-      enum: Object.values(ACCOUNT_TYPE),
+      enum: Object.values(ACCOUNT_TYPE), // ADMIN, SELLER, BUYER
       required: true,
       immutable: true,
       index: true,
@@ -51,7 +51,7 @@ const userSchema = new Schema(
 
     accountStatus: {
       type: String,
-      enum: Object.values(STATUS.ACCOUNT),
+      enum: Object.values(STATUS.ACCOUNT), // PENDING, APPROVED, REJECTED
       default: STATUS.ACCOUNT.PENDING,
       index: true,
     },
@@ -100,7 +100,7 @@ const userSchema = new Schema(
 
     productType: {
       type: String,
-      enum: Object.values(PRODUCT_TYPE),
+      enum: Object.values(PRODUCT_TYPE), // CANNABIS, HEMP
       required: [true, "Product type is required."],
       immutable: true,
       index: true,

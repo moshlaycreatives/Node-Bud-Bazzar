@@ -8,13 +8,7 @@ import path from "path";
 // ╚════════════════════════════════════════╝
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    let uploadPath = "public/uploads";
-
-    if (file.fieldname === "images" || file.fieldname === "image") {
-      uploadPath = "public/images";
-    } else if (file.fieldname === "documents") {
-      uploadPath = "public/documents";
-    }
+    const uploadPath = "public/uploads";
 
     if (!fs.existsSync(uploadPath)) {
       fs.mkdirSync(uploadPath, { recursive: true });
@@ -26,34 +20,22 @@ const storage = multer.diskStorage({
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
     const ext = path.extname(file.originalname);
-    cb(
-      null,
-      `${
-        file.fieldname === "images" || file.fieldname === "image"
-          ? "image"
-          : "pdf"
-      }_${uniqueSuffix}${ext}`
-    );
+    const baseName = path.basename(file.originalname, ext).replace(/\s+/g, "_");
+
+    cb(null, `${baseName}_${uniqueSuffix}${ext}`);
   },
 });
 
 // ╔═════════════════════════════════════╗
-// ║      File filter configuration      ║
+// ║        Optional file filter         ║
 // ╚═════════════════════════════════════╝
 const fileFilter = (req, file, cb) => {
   const ext = path.extname(file.originalname).toLowerCase();
 
-  if (file.fieldname === "images" || file.fieldname === "image") {
-    if (![".jpg", ".jpeg", ".png"].includes(ext)) {
-      return cb(
-        new BadRequestException("Only JPG, JPEG, and PNG images are allowed."),
-        false
-      );
-    }
-  } else if (file.fieldname === "documents") {
-    if (ext !== ".pdf") {
-      return cb(new BadRequestException("Only PDF files are allowed."), false);
-    }
+  // ❌ Optional security: block potentially dangerous files
+  const blockedExts = [".exe", ".sh", ".bat", ".cmd"];
+  if (blockedExts.includes(ext)) {
+    return cb(new BadRequestException("This file type is not allowed."), false);
   }
 
   cb(null, true);
