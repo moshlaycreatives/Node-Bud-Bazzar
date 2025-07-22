@@ -1,17 +1,18 @@
-import { NotFoundException } from "../errors/index.js";
+import { BadRequestException } from "../errors/index.js";
 
 // ╔══════════════════════════════════════════════╗
 // ║      Middleware : Check Required Fields      ║
 // ╚══════════════════════════════════════════════╝
 export const requiredFields = (requiredFields) => (req, res, next) => {
   const missingFields = [];
+  const emptyFields = [];
 
   const isEmpty = (value) => {
     return (
-      value === undefined ||
-      value === null ||
       (typeof value === "string" && value.trim() === "") ||
-      (typeof value === "object" && Object.keys(value).length === 0) ||
+      (typeof value === "object" &&
+        !Array.isArray(value) &&
+        Object.keys(value).length === 0) ||
       (Array.isArray(value) && value.length === 0)
     );
   };
@@ -29,7 +30,7 @@ export const requiredFields = (requiredFields) => (req, res, next) => {
     }
 
     if (isEmpty(current)) {
-      missingFields.push(fieldPath);
+      emptyFields.push(fieldPath);
     }
   };
 
@@ -37,17 +38,31 @@ export const requiredFields = (requiredFields) => (req, res, next) => {
     checkField(field, req.body);
   }
 
-  if (missingFields.length > 0) {
-    if (missingFields.length > 1) {
-      missingFields[missingFields.length - 1] = `and ${
-        missingFields[missingFields.length - 1]
-      }`;
+  if (missingFields.length || emptyFields.length) {
+    const messages = [];
+
+    if (missingFields.length) {
+      const list = formatList(missingFields);
+      messages.push(
+        `Missing required field${missingFields.length > 1 ? "s" : ""}: ${list}`
+      );
     }
 
-    throw new NotFoundException(`Please provide ${missingFields.join(", ")}`);
-  } else {
-    next();
+    if (emptyFields.length) {
+      const list = formatList(emptyFields);
+      messages.push(`Fields cannot be empty: ${list}`);
+    }
+
+    throw new BadRequestException(messages.join(" | "));
   }
+
+  next();
+};
+
+// Helper: Format list with commas and "and"
+const formatList = (fields) => {
+  if (fields.length === 1) return fields[0];
+  return fields.slice(0, -1).join(", ") + " and " + fields[fields.length - 1];
 };
 
 // ╔═══════════════════════════════════╗

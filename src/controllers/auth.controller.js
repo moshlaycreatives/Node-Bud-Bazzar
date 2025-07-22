@@ -5,6 +5,7 @@ import {
   UnAuthorizedException,
   BadRequestException,
   InternalServerErrorException,
+  UnProcessableException,
 } from "../errors/index.js";
 import bcrypt from "bcryptjs";
 
@@ -92,6 +93,8 @@ export const login = asyncHandler(async (req, res) => {
     throw new UnAuthorizedException(
       "Your account is in pending state. Please wait for admin approval."
     );
+  } else if (user.isBlocked) {
+    throw new UnProcessableException("You account is blocked by admin.");
   }
 
   const token = user.createJWT();

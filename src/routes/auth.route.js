@@ -12,7 +12,6 @@ import {
   forgotPassword,
   compareForgotPasswordOTP,
   resetPassword,
-  getProfileDetails,
 } from "../controllers/auth.controller.js";
 
 const authRouter = Router();
@@ -80,10 +79,5 @@ authRouter
 authRouter
   .route("/reset-password")
   .post(trimBodyObject, requiredFields(["email", "password"]), resetPassword);
-
-// ╔══════════════════════════╗
-// ║      Get User by ID      ║
-// ╚══════════════════════════╝
-authRouter.route("/profile-details").get(loginAuth, getProfileDetails);
 
 export { authRouter };

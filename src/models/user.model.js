@@ -56,6 +56,17 @@ const userSchema = new Schema(
       index: true,
     },
 
+    reasonOfRejection: {
+      type: String,
+      trim: true,
+      default: null,
+    },
+
+    isBlocked: {
+      type: Boolean,
+      default: false,
+    },
+
     firstName: {
       type: String,
       trim: true,
