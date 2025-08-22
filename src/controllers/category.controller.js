@@ -1,7 +1,7 @@
 import { CategoryModel } from "../models/category.model.js";
 import { asyncHandler, ApiResponce } from "../utils/index.js";
 import { NotFoundException, BadRequestException } from "../errors/index.js";
-import { PRODUCT_TYPE } from "../constants/index.js";
+import { PRODUCT_TYPES } from "../constants/index.js";
 
 // ╔═══════════════════════════╗
 // ║      Create Category      ║
@@ -13,7 +13,7 @@ export const createCategory = asyncHandler(async (req, res) => {
     throw new BadRequestException("Category image is required.");
   }
 
-  if (!PRODUCT_TYPE.includes(productType)) {
+  if (!PRODUCT_TYPES.includes(productType)) {
     throw new BadRequestException("Invalid product type.");
   }
 
@@ -84,7 +84,7 @@ export const updateCategory = asyncHandler(async (req, res) => {
   const { name, productType } = req.body;
   const { id } = req.params;
 
-  if (!PRODUCT_TYPE.includes(productType)) {
+  if (!PRODUCT_TYPES.includes(productType)) {
     throw new BadRequestException("Invalid product type.");
   }
 

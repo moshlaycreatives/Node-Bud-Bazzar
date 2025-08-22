@@ -1,8 +1,15 @@
 import { Schema, model } from "mongoose";
-import { PRODUCT_TYPE } from "../constants/index.js";
+import { PRODUCT_TYPES } from "../constants/index.js";
 
 const categorySchema = new Schema(
   {
+    createdBy: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: [true, "Creator ID is required."],
+      index: true,
+    },
+
     name: {
       type: String,
       trim: true,
@@ -19,7 +26,7 @@ const categorySchema = new Schema(
 
     productType: {
       type: String,
-      enum: PRODUCT_TYPE,
+      enum: PRODUCT_TYPES,
       required: true,
     },
   },

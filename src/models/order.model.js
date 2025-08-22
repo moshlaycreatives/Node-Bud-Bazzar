@@ -1,5 +1,5 @@
 import { model, Schema } from "mongoose";
-import { CANNABINOID_TYPE, PRODUCT_TYPE, STATUS } from "../constants/index.js";
+import { PAYMENT_METHODS } from "../constants/index.js";
 
 // ╔════════════════════════════════╗
 // ║      Order Counter Schema      ║
@@ -22,36 +22,18 @@ const orderCounter = new Schema(
 
 export const OrderCounterModel = model("OrderCounter", orderCounter);
 
-// ╔════════════════════════╗
-// ║      Order Schema      ║
-// ╚════════════════════════╝
-const orderSchema = new Schema(
+const orderedProductSchema = new Schema(
   {
-    id: {
-      type: String,
-      required: [true, "Order id is required."],
-      unique: true,
-      immutable: true,
-      index: true,
+    productId: {
+      type: Schema.Types.ObjectId,
+      ref: "Product",
+      required: [true, "Product id is required."],
     },
 
-    productStatus: {
-      type: String,
-      enum: Object.values(STATUS.PRODUCT),
-      default: STATUS.PRODUCT.PENDING,
-    },
-
-    productName: {
-      type: String,
-      trim: true,
-      required: [true, "Product name is required."],
-      index: true,
-    },
-
-    description: {
-      type: String,
-      trim: true,
-      required: [true, "Product description is required."],
+    qty: {
+      type: Number,
+      required: [true, "Product quantity is required."],
+      min: [1, "Product quantity must be at least 1."],
     },
 
     sellerPrice: {
@@ -59,66 +41,80 @@ const orderSchema = new Schema(
       required: [true, "Seller price is required."],
     },
 
-    productCategory: {
-      type: String,
-      trim: true,
-      required: [true, "Product category is required."],
-    },
-
-    productType: {
-      type: String,
-      trim: true,
-      enum: Object.values(PRODUCT_TYPE),
-      required: [true, "Product type is required."],
-    },
-
-    cannabinoidType: {
-      type: String,
-      trim: true,
-      enum: Object.values(CANNABINOID_TYPE),
-      required: [true, "Cannabinoid type is required."],
-    },
-
-    strainType: {
-      type: String,
-      trim: true,
-      required: [true, "Product strain type is required."],
-    },
-
-    growType: {
-      type: String,
-      trim: true,
-      required: [true, "Product grow type is required."],
-    },
-
-    sellerId: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
-
-    labReport: {
-      type: String,
-      trim: true,
-      required: [true, "Product lab report is required."],
-    },
-
-    productImage: {
-      type: String,
-      trim: true,
-      required: [true, "Product image is required."],
-    },
-
-    galleryContent: [
-      {
-        type: String,
-        trim: true,
-      },
-    ],
-
     profitMargin: {
       type: Number,
-      default: 0,
+      required: [true, "Profit margin is required."],
+      min: [0, "Profit margin cannot be negative."],
+    },
+  },
+  { _id: false, versionKey: false, timestamps: false }
+);
+
+const subOrderSchema = new Schema({
+  sellerId: {
+    type: Schema.Types.ObjectId,
+    ref: "User",
+    required: [true, "Seller id is required."],
+  },
+
+  categories: {
+    type: [String],
+    trim: true,
+    required: [true, "Product category is required."],
+  },
+
+  products: [orderedProductSchema],
+
+  subTotal: {
+    type: Number,
+    required: [true, "Subtotal is required."],
+  },
+
+  shippingCost: {
+    type: Number,
+    required: [true, "Shipping cost is required."],
+  },
+
+  total: {
+    type: Number,
+    required: [true, "Total amount is required."],
+  },
+});
+
+// ╔════════════════════════╗
+// ║      Order Schema      ║
+// ╚════════════════════════╝
+const orderSchema = new Schema(
+  {
+    orderCustomId: {
+      type: Number,
+      required: [true, "Order id is required."],
+      unique: true,
+      immutable: true,
+      index: true,
+    },
+
+    customerId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: [true, "Customer id is required."],
+    },
+
+    order: {
+      type: [subOrderSchema],
+      required: [true, "Order details are required."],
+    },
+
+    whitneyBlockId: {
+      type: Schema.Types.ObjectId,
+      ref: "WhitneyBlock",
+      required: [true, "Whitney block id is required."],
+    },
+
+    paymentMethod: {
+      type: String,
+      enum: Object.values(PAYMENT_METHODS),
+      required: [true, "Payment method is required."],
     },
 
     date: {
@@ -135,21 +131,21 @@ const orderSchema = new Schema(
 orderSchema.pre("validate", async function (next) {
   if (this.isNew) {
     try {
-      let count = await OrderCounterModel.findOne({ name: "id" });
+      let count = await OrderCounterModel.findOne({ name: "orderCustomId" });
       if (!count) {
-        count = await OrderCounterModel.create({ name: "id" });
+        count = await OrderCounterModel.create({ name: "orderCustomId" });
       }
 
       const updatedCounter = await OrderCounterModel.findOneAndUpdate(
-        { name: "id" },
+        { name: "orderCustomId" },
         { $inc: { count: 1 } },
         { new: true }
       );
 
-      this.id = updatedCounter.count;
+      this.orderCustomId = updatedCounter.count;
       next();
     } catch (error) {
-      console.error("An error occurred while creating order id.");
+      console.error("An error occurred while creating order custom id.");
       return next(error);
     }
   }

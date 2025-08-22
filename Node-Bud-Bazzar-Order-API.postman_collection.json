@@ -1,0 +1,377 @@
+{
+  "info": {
+    "_postman_id": "node-bud-bazzar-order-api",
+    "name": "Node Bud Bazzar - Order API",
+    "description": "Comprehensive API collection for Order Management System\n\nThis collection includes all endpoints for managing orders, including:\n- Creating new orders\n- Retrieving orders by various criteria\n- Updating order details\n- Deleting orders\n- Getting order statistics\n\nBase URL: {{baseUrl}}/api/v1/order\n\nAuthentication: Most endpoints require Bearer token authentication",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "node-bud-bazzar"
+  },
+  "item": [
+    {
+      "name": "Order Management",
+      "item": [
+        {
+          "name": "Create New Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"{{customerId}}\",\n  \"whitneyBlockId\": \"{{whitneyBlockId}}\",\n  \"paymentMethod\": \"ACH Transfer\",\n  \"order\": [\n    {\n      \"sellerId\": \"{{sellerId}}\",\n      \"categories\": [\"Cannabis\", \"Flower\"],\n      \"products\": [\n        {\n          \"productId\": \"{{productId}}\",\n          \"qty\": 2,\n          \"sellerPrice\": 25.00,\n          \"profitMargin\": 5.00\n        }\n      ],\n      \"subTotal\": 50.00,\n      \"shippingCost\": 10.00,\n      \"total\": 60.00\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/order",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "order"]
+            },
+            "description": "Create a new order with customer details, products, and payment information.\n\n**Required Fields:**\n- customerId: MongoDB ObjectId of the customer\n- whitneyBlockId: MongoDB ObjectId of the Whitney block\n- paymentMethod: One of [\"ACH Transfer\", \"Wire Transfer\", \"Pay with Check\", \"Cash on Delivery\"]\n- order: Array of sub-orders with seller details and products\n\n**Authentication:** Required (Bearer token)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Orders",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/order?page=1&limit=10&customerId={{customerId}}&sellerId={{sellerId}}&paymentMethod=ACH Transfer",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "order"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number for pagination"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Number of items per page"
+                },
+                {
+                  "key": "customerId",
+                  "value": "{{customerId}}",
+                  "description": "Filter by customer ID (optional)"
+                },
+                {
+                  "key": "sellerId",
+                  "value": "{{sellerId}}",
+                  "description": "Filter by seller ID (optional)"
+                },
+                {
+                  "key": "paymentMethod",
+                  "value": "ACH Transfer",
+                  "description": "Filter by payment method (optional)"
+                }
+              ]
+            },
+            "description": "Retrieve all orders with optional filtering and pagination.\n\n**Query Parameters:**\n- page: Page number (default: 1)\n- limit: Items per page (default: 10)\n- customerId: Filter by customer ID\n- sellerId: Filter by seller ID\n- paymentMethod: Filter by payment method\n\n**Authentication:** Not required"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Order By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/order/{{orderId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "order", "{{orderId}}"]
+            },
+            "description": "Retrieve a specific order by its MongoDB ObjectId.\n\n**Path Parameters:**\n- orderId: MongoDB ObjectId of the order\n\n**Authentication:** Not required"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Order By Custom ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/order/custom/{{orderCustomId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "order", "custom", "{{orderCustomId}}"]
+            },
+            "description": "Retrieve a specific order by its custom order ID (numeric).\n\n**Path Parameters:**\n- orderCustomId: Numeric custom order ID\n\n**Authentication:** Not required"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Orders By Customer",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/order/customer/{{customerId}}?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "order", "customer", "{{customerId}}"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number for pagination"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Number of items per page"
+                }
+              ]
+            },
+            "description": "Retrieve all orders for a specific customer with pagination.\n\n**Path Parameters:**\n- customerId: MongoDB ObjectId of the customer\n\n**Query Parameters:**\n- page: Page number (default: 1)\n- limit: Items per page (default: 10)\n\n**Authentication:** Not required"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Orders By Seller",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/order/seller/{{sellerId}}?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "order", "seller", "{{sellerId}}"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number for pagination"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Number of items per page"
+                }
+              ]
+            },
+            "description": "Retrieve all orders for a specific seller with pagination.\n\n**Path Parameters:**\n- sellerId: MongoDB ObjectId of the seller\n\n**Query Parameters:**\n- page: Page number (default: 1)\n- limit: Items per page (default: 10)\n\n**Authentication:** Not required"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Order",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"paymentMethod\": \"Wire Transfer\",\n  \"order\": [\n    {\n      \"sellerId\": \"{{sellerId}}\",\n      \"categories\": [\"Cannabis\", \"Flower\"],\n      \"products\": [\n        {\n          \"productId\": \"{{productId}}\",\n          \"qty\": 3,\n          \"sellerPrice\": 25.00,\n          \"profitMargin\": 5.00\n        }\n      ],\n      \"subTotal\": 75.00,\n      \"shippingCost\": 10.00,\n      \"total\": 85.00\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/order/{{orderId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "order", "{{orderId}}"]
+            },
+            "description": "Update an existing order's details.\n\n**Path Parameters:**\n- orderId: MongoDB ObjectId of the order\n\n**Body Parameters (optional):**\n- paymentMethod: New payment method\n- order: Updated order structure\n\n**Authentication:** Required (Bearer token)"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Order",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/order/{{orderId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "order", "{{orderId}}"]
+            },
+            "description": "Delete a specific order (Admin only).\n\n**Path Parameters:**\n- orderId: MongoDB ObjectId of the order\n\n**Authentication:** Required (Bearer token + Admin role)"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Order Statistics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/order/statistics?startDate=2024-01-01&endDate=2024-12-31&customerId={{customerId}}&sellerId={{sellerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "order", "statistics"],
+              "query": [
+                {
+                  "key": "startDate",
+                  "value": "2024-01-01",
+                  "description": "Start date for statistics (YYYY-MM-DD)"
+                },
+                {
+                  "key": "endDate",
+                  "value": "2024-12-31",
+                  "description": "End date for statistics (YYYY-MM-DD)"
+                },
+                {
+                  "key": "customerId",
+                  "value": "{{customerId}}",
+                  "description": "Filter by customer ID (optional)"
+                },
+                {
+                  "key": "sellerId",
+                  "value": "{{sellerId}}",
+                  "description": "Filter by seller ID (optional)"
+                }
+              ]
+            },
+            "description": "Get order statistics and analytics (Admin only).\n\n**Query Parameters (optional):**\n- startDate: Start date for statistics (YYYY-MM-DD)\n- endDate: End date for statistics (YYYY-MM-DD)\n- customerId: Filter by customer ID\n- sellerId: Filter by seller ID\n\n**Authentication:** Required (Bearer token + Admin role)"
+          },
+          "response": []
+        }
+      ],
+      "description": "Complete order management operations including CRUD operations and analytics."
+    },
+    {
+      "name": "Examples & Templates",
+      "item": [
+        {
+          "name": "Create Order - Complete Example",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customerId\": \"507f1f77bcf86cd799439011\",\n  \"whitneyBlockId\": \"507f1f77bcf86cd799439012\",\n  \"paymentMethod\": \"ACH Transfer\",\n  \"order\": [\n    {\n      \"sellerId\": \"507f1f77bcf86cd799439013\",\n      \"categories\": [\"Cannabis\", \"Flower\", \"Indica\"],\n      \"products\": [\n        {\n          \"productId\": \"507f1f77bcf86cd799439014\",\n          \"qty\": 2,\n          \"sellerPrice\": 45.00,\n          \"profitMargin\": 8.00\n        },\n        {\n          \"productId\": \"507f1f77bcf86cd799439015\",\n          \"qty\": 1,\n          \"sellerPrice\": 35.00,\n          \"profitMargin\": 6.00\n        }\n      ],\n      \"subTotal\": 125.00,\n      \"shippingCost\": 15.00,\n      \"total\": 140.00\n    },\n    {\n      \"sellerId\": \"507f1f77bcf86cd799439016\",\n      \"categories\": [\"Hemp\", \"CBD\"],\n      \"products\": [\n        {\n          \"productId\": \"507f1f77bcf86cd799439017\",\n          \"qty\": 3,\n          \"sellerPrice\": 20.00,\n          \"profitMargin\": 4.00\n        }\n      ],\n      \"subTotal\": 60.00,\n      \"shippingCost\": 10.00,\n      \"total\": 70.00\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/order",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "order"]
+            },
+            "description": "Complete example of creating an order with multiple sub-orders and products."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Order - Partial Update",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"paymentMethod\": \"Wire Transfer\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/order/{{orderId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "order", "{{orderId}}"]
+            },
+            "description": "Example of partially updating an order (only payment method)."
+          },
+          "response": []
+        }
+      ],
+      "description": "Example requests and templates for common use cases."
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "your_jwt_token_here",
+      "type": "string"
+    },
+    {
+      "key": "orderId",
+      "value": "507f1f77bcf86cd799439018",
+      "type": "string"
+    },
+    {
+      "key": "orderCustomId",
+      "value": "2001",
+      "type": "string"
+    },
+    {
+      "key": "customerId",
+      "value": "507f1f77bcf86cd799439011",
+      "type": "string"
+    },
+    {
+      "key": "sellerId",
+      "value": "507f1f77bcf86cd799439013",
+      "type": "string"
+    },
+    {
+      "key": "productId",
+      "value": "507f1f77bcf86cd799439014",
+      "type": "string"
+    },
+    {
+      "key": "whitneyBlockId",
+      "value": "507f1f77bcf86cd799439012",
+      "type": "string"
+    }
+  ]
+}
+

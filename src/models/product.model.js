@@ -1,8 +1,8 @@
 import { model, Schema } from "mongoose";
 import {
-  CANNABINOID_TYPE,
+  CANNABINOID_TYPES,
   PRODUCT_TAGS,
-  PRODUCT_TYPE,
+  PRODUCT_TYPES,
   STATUS,
 } from "../constants/index.js";
 
@@ -73,14 +73,14 @@ const productSchema = new Schema(
     productType: {
       type: String,
       trim: true,
-      enum: Object.values(PRODUCT_TYPE), // CANNABIS, HEMP
+      enum: Object.values(PRODUCT_TYPES), // CANNABIS, HEMP
       required: [true, "Product type is required."],
     },
 
     cannabinoidType: {
       type: String,
       trim: true,
-      enum: Object.values(CANNABINOID_TYPE), // THCA, THCP
+      enum: Object.values(CANNABINOID_TYPES), // THCA, THCP
       required: [true, "Cannabinoid type is required."],
     },
 

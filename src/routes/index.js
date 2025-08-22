@@ -5,13 +5,15 @@ import { categoryRouter } from "./category.route.js";
 import { loginAuth, adminAuth } from "../middlewares/index.js";
 import { productRouter } from "./product.route.js";
 import { reviewRouter } from "./review.route.js";
+import { orderRouter } from "./order.route.js";
+import { whitneyBlockRouter } from "./whitneyBlock.route.js";
 
 const router = Router();
 
 // ╔═══════════════════════╗
 // ║      User Routes      ║
 // ╚═══════════════════════╝
-router.use("/user", authRouter);
+router.use("/auth", authRouter);
 
 // ╔════════════════════════╗
 // ║      Admin Routes      ║
@@ -32,5 +34,15 @@ router.use("/product", productRouter);
 // ║      Review      ║
 // ╚══════════════════╝
 router.use("/review", reviewRouter);
+
+// ╔══════════════════╗
+// ║      Order       ║
+// ╚══════════════════╝
+router.use("/order", orderRouter);
+
+// ╔════════════════════════╗
+// ║      WhitneyBlock      ║
+// ╚════════════════════════╝
+router.use("/whitney-block", loginAuth, whitneyBlockRouter);
 
 export { router };

@@ -5,7 +5,7 @@ import {
   BadRequestException,
   InternalServerErrorException,
 } from "../errors/index.js";
-import { ACCOUNT_TYPE, PRODUCT_TYPE, STATUS } from "../constants/index.js";
+import { ACCOUNT_TYPES, PRODUCT_TYPES, STATUS } from "../constants/index.js";
 
 // ╔═══════════════════════════════╗
 // ║      User Counter Schema      ║
@@ -43,7 +43,7 @@ const userSchema = new Schema(
 
     accountType: {
       type: String,
-      enum: Object.values(ACCOUNT_TYPE), // ADMIN, SELLER, BUYER
+      enum: Object.values(ACCOUNT_TYPES), // ADMIN, SELLER, BUYER
       required: true,
       immutable: true,
       index: true,
@@ -65,6 +65,12 @@ const userSchema = new Schema(
     isBlocked: {
       type: Boolean,
       default: false,
+    },
+
+    reasonOfBlock: {
+      type: String,
+      trim: true,
+      default: null,
     },
 
     firstName: {
@@ -111,7 +117,7 @@ const userSchema = new Schema(
 
     productType: {
       type: String,
-      enum: Object.values(PRODUCT_TYPE), // CANNABIS, HEMP
+      enum: Object.values(PRODUCT_TYPES), // CANNABIS, HEMP, ACCESSORY
       required: [true, "Product type is required."],
       immutable: true,
       index: true,

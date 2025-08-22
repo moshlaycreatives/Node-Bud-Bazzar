@@ -1,7 +1,7 @@
 import { UserModel } from "../models/user.model.js";
 import { asyncHandler, ApiResponce } from "../utils/index.js";
 import { NotFoundException, BadRequestException } from "../errors/index.js";
-import { ACCOUNT_TYPE, STATUS } from "../constants/index.js";
+import { ACCOUNT_TYPES, STATUS } from "../constants/index.js";
 import { isValidObjectId } from "mongoose";
 
 // ╔════════════════════════════════╗
@@ -9,7 +9,7 @@ import { isValidObjectId } from "mongoose";
 // ╚════════════════════════════════╝
 export const getAccountRequests = asyncHandler(async (req, res) => {
   const users = await UserModel.find({
-    accountType: { $ne: ACCOUNT_TYPE.ADMIN },
+    accountType: { $ne: ACCOUNT_TYPES.ADMIN },
     accountStatus: STATUS.ACCOUNT.PENDING,
   }).select(
     "-password -resetPasswordOTP -resetPasswordExpire -createdAt -updatedAt"
@@ -32,7 +32,7 @@ export const getAccountRequests = asyncHandler(async (req, res) => {
 // ╚══════════════════════════════════╝
 export const getAllApprovedUsers = asyncHandler(async (req, res) => {
   const users = await UserModel.find({
-    accountType: { $ne: ACCOUNT_TYPE.ADMIN },
+    accountType: { $ne: ACCOUNT_TYPES.ADMIN },
     accountStatus: STATUS.ACCOUNT.APPROVED,
     isBlocked: false,
   }).select(

@@ -5,7 +5,7 @@ import {
   UnAuthorizedException,
 } from "../errors/index.js";
 import { ApiResponce, asyncHandler } from "../utils/index.js";
-import { ACCOUNT_TYPE, PRODUCT_TAGS, STATUS } from "../constants/index.js";
+import { ACCOUNT_TYPES, PRODUCT_TAGS, STATUS } from "../constants/index.js";
 
 // ╔═══════════════════════════╗
 // ║      Add New Product      ║
@@ -257,8 +257,8 @@ export const deleteProduct = asyncHandler(async (req, res) => {
   const { productId } = req.params;
 
   if (
-    req.userRole !== ACCOUNT_TYPE.ADMIN &&
-    req.userRole !== ACCOUNT_TYPE.SELLER
+    req.userRole !== ACCOUNT_TYPES.ADMIN &&
+    req.userRole !== ACCOUNT_TYPES.SELLER
   ) {
     throw new UnAuthorizedException("Invalid user role.");
   }
@@ -272,7 +272,7 @@ export const deleteProduct = asyncHandler(async (req, res) => {
   }
 
   if (
-    req.userRole === ACCOUNT_TYPE.SELLER &&
+    req.userRole === ACCOUNT_TYPES.SELLER &&
     req.userId.toString() !== product.sellerId.toString()
   ) {
     throw new UnAuthorizedException("Unauthorized seller.");

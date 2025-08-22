@@ -1,34 +1,8 @@
-const STATUS_VALUES = {
-  PENDING: "PENDING",
-  APPROVED: "APPROVED",
-  REJECTED: "REJECTED",
-};
-
-export const STATUS = {
-  ACCOUNT: STATUS_VALUES,
-  CATEGORY_REQUEST: STATUS_VALUES,
-  PRODUCT: STATUS_VALUES,
-  RATING: STATUS_VALUES,
-};
-
-export const PRODUCT_TYPE = {
-  CANNABIS: "CANNABIS",
-  HEMP: "HEMP",
-};
-
-export const ACCOUNT_TYPE = {
-  ADMIN: "ADMIN",
-  SELLER: "SELLER",
-  BUYER: "BUYER",
-};
-
-export const CANNABINOID_TYPE = {
-  THCA: "THCA",
-  THCP: "THCP",
-};
-
-export const PRODUCT_TAGS = {
-  NEW: "NEW",
-  RECOMENDED: "RECOMMENDED",
-  FEATURED: "FEATURED",
-};
+export * from "./accountTypes.constants.js";
+export * from "./cannabinoidTypes.constants.js";
+export * from "./paymentMethods.constants.js";
+export * from "./paymentStatus.constants.js";
+export * from "./productTags.constants.js";
+export * from "./productTypes.constants.js";
+export * from "./orderStatus.constants.js";
+export * from "./status.constants.js";

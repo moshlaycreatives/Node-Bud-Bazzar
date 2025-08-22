@@ -1,0 +1,12 @@
+const STATUS_VALUES = {
+  PENDING: "Pending",
+  APPROVED: "Approved",
+  REJECTED: "Rejected",
+};
+
+export const STATUS = {
+  ACCOUNT: STATUS_VALUES,
+  CATEGORY_REQUEST: STATUS_VALUES,
+  PRODUCT: STATUS_VALUES,
+  RATING: STATUS_VALUES,
+};

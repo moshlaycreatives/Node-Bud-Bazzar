@@ -65,7 +65,7 @@ app.get("/favicon.ico", (req, res) => res.status(204).send());
 // ╔══════════════════════╗
 // ║      All Routes      ║
 // ╚══════════════════════╝
-app.use("/api/v1", router);
+app.use("/api", router);
 
 // ╔══════════════════════════════════════╗
 // ║      Error Handling Middlewares      ║
